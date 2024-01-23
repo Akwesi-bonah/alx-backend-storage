@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """ script that list all document in collection """
 
 def list_all(mongo_collection):

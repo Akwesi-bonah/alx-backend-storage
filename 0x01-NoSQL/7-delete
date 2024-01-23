@@ -1,4 +1,4 @@
-// script that delete all document 
+// script that delete all document
 db.school.deleteMany(
-    {"name": "Holberton school"}
-)
+    { name: "Holberton school" }
+    )

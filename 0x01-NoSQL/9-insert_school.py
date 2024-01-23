@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """Defines insert_school method"""
 
 def insert_school(mongo_collection, **kwargs):
