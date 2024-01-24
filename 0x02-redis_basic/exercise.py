@@ -7,10 +7,6 @@ from typing import Union, Callable
 from functools import wraps
 
 
-
-
-
-
 def count_calls(method: Callable) -> callable:
     """count_calls method"""
     key = method.__qualname__
@@ -54,8 +50,6 @@ def replay(method: Callable):
     for i, o in zip(inputs, outputs):
         print("{}(*{}) -> {}".format(key, i.decode("utf-8"),
                                      o.decode("utf-8")))
-        
-
 
 
 class Cache:
@@ -65,7 +59,7 @@ class Cache:
         """init method"""
         self._redis = Redis()
         self._redis.flushdb()
-    
+
     @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
@@ -73,27 +67,26 @@ class Cache:
         key = str(uuid4())
         self._redis.set(key, data)
         return key
-    
-    def get(self, key: str, fn: callable = None) -> Union[str, bytes, int, float]:
+
+    def get(self, key: str, fn: callable = None
+            ) -> Union[str, bytes, int, float]:
         """get method"""
         data = self._redis.get(key)
         if fn:
             data = fn(data)
         return data
-    
+
     def get_str(self, key: str) -> str:
         """get_str method"""
         return self.get(key, str)
-    
+
     def get_int(self, key: str) -> int:
         """get_int method"""
         return self.get(key, int)
-    
 
 
 if __name__ == "__main__":
 
-    
     cache = Cache()
     print(cache.store("foo"))
     print(cache.store("bar"))
