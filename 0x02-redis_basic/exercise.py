@@ -3,7 +3,7 @@
 
 from redis import Redis
 from uuid import uuid4
-from typing import Union, Callable
+from typing import Union, Callable, Optional
 from functools import wraps
 
 
@@ -35,9 +35,9 @@ def call_history(method: Callable) -> callable:
     return wrapper
 
 
-def replay(method: Callable):
+def replay(fn: Callable):
     """replay method"""
-    key = method.__qualname__
+    key = fn.__qualname__
     redis = Redis()
     count = redis.get(key)
     input_list_key = key + ":inputs"
@@ -57,7 +57,7 @@ class Cache:
 
     def __init__(self) -> None:
         """init method"""
-        self._redis = Redis()
+        self._redis = Redis(host='localhost', port=6379, db=0)
         self._redis.flushdb()
 
     @call_history
@@ -68,13 +68,13 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: callable = None
-            ) -> Union[str, bytes, int, float]:
-        """get method"""
-        data = self._redis.get(key)
+    def get(self, key: str,
+            fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
+        '''convert the data back to the desired format'''
+        value = self._redis.get(key)
         if fn:
-            data = fn(data)
-        return data
+            value = fn(value)
+        return value
 
     def get_str(self, key: str) -> str:
         """get_str method"""
@@ -82,12 +82,9 @@ class Cache:
 
     def get_int(self, key: str) -> int:
         """get_int method"""
-        return self.get(key, int)
-
-
-if __name__ == "__main__":
-
-    cache = Cache()
-    print(cache.store("foo"))
-    print(cache.store("bar"))
-    print(cache.store(42))
+        value = self._redis.get(key)
+        try:
+            value = int(value.decode("utf-8"))
+        except Exception:
+            value = 0
+        return value
